@@ -1,92 +1,17 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
-
-
 '''
 Created on Oct 01, 2022
 
 @author: Samira Fallah (saf418@lehigh.edu)
 '''
 
-
-# In[ ]:
-
-
 import time
 import argparse
 from gurobipy import *
 import sys
 import math
-
-
-# # Insert the instance manually
-
-# In[ ]:
-
-
-# numVars = 11
-# numIntVars = 9
-# numContVars = 1
-# numConsFixed = 1
-# numConsVar = 1
-# INTVARS = range(numIntVars)
-# CONVARS = range(numIntVars, numIntVars+numContVars)
-# SLACKVARS = range(numIntVars+numContVars, numVars)
-# CONSVARRHS = range(numConsVar)
-# CONSFIXEDRHS = range(numConsFixed)
-# UB_I = 1
-# instanceName = ''
-
-# Ins 1
-# OBJ = [-566, -611, -506, -180, -817, -184, -585, -423, -26, -317, 0]
-# MAT = {(0, 0):-62, (0, 1):-84, (0, 2):-977, (0, 3):-979, (0, 4):-874, (0, 5):-54, (0, 6):-269, (0, 7):-93, (0, 8):-881, (0, 9):-563, (0, 10):0}
-# MATFixed = {(0, 0):557, (0, 1):898, (0, 2):148, (0, 3):63, (0, 4):78, (0, 5):964, (0, 6):246, (0, 7):662, (0, 8):386, (0, 9):272, (0, 10):1}
-# RHS = {0:2137}
-
-# Ins 2
-# OBJ = [-149, -741, -532, -380, -656, -391, -694, -371, -579, -662, 0]
-# MAT = {(0, 0):-154, (0, 1):-201, (0, 2):-489, (0, 3):-993, (0, 4):-788, (0, 5):-148, (0, 6):-82, (0, 7):-232, (0, 8):-312, (0, 9):-178, (0, 10):0}
-# MATFixed = {(0, 0):215, (0, 1):402, (0, 2):408, (0, 3):746, (0, 4):782, (0, 5):63, (0, 6):137, (0, 7):476, (0, 8):434, (0, 9):715, (0, 10):1}
-# RHS = {0:2189}
-
-# Ins 3
-# OBJ = [-230, -870, -555, -578, -995, -596, -800, -819, -630, -504, 0]
-# MAT = {(0, 0):-747, (0, 1):-816, (0, 2):-996, (0, 3):-509, (0, 4):-700, (0, 5):-238, (0, 6):-395, (0, 7):-870, (0, 8):-236, (0, 9):-292, (0, 10):0}
-# MATFixed = {(0, 0):860, (0, 1):900, (0, 2):169, (0, 3):415, (0, 4):477, (0, 5):163, (0, 6):10, (0, 7):277, (0, 8):981, (0, 9):640, (0, 10):1}
-# RHS = {0:2446}
-
-# UB_I = 1
-
-
-# In[ ]:
-
-
-# numVars = 9
-# numIntVars = 2
-# numContVars = 5
-# numConsFixed = 3
-# numConsVar = 1
-# INTVARS = range(numIntVars)
-# CONVARS = range(numIntVars, numIntVars+numContVars)
-# SLACKVARS = range(numIntVars+numContVars, numVars)
-# CONSVARRHS = range(numConsVar)
-# CONSFIXEDRHS = range(numConsFixed)
-
-# # Ins 4
-# OBJ = [2, 5, 0, 7, 10, 2, 10, 0, 0]
-# MAT = {(0, 0):-1, (0, 1):-10, (0, 2):10, (0, 3):-8, (0, 4):1, (0, 5):-7, (0, 6):6, (0, 7):0, (0, 8):0}
-# MATFixed = {(0, 0):-1, (0, 1):4, (0, 2):9, (0, 3):3, (0, 4):2, (0, 5):6, (0, 6):-10, (0, 7):0, (0, 8):0,
-#            (1, 0):0, (1, 1):5, (1, 2):0, (1, 3):1, (1, 4):0, (1, 5):0, (1, 6):0, (1, 7):1, (1, 8):0,
-#            (2, 0):0, (2, 1):5, (2, 2):0, (2, 3):0, (2, 4):0, (2, 5):0, (2, 6):1, (2, 7):0, (2, 8):1}
-
-# RHS = {0:4, 1:5, 2:5}
-# UB_I = 1
-
-
-# In[ ]:
-
 
 # adding Folder to the system path
 sys.path.insert(0, '/home/saf418/ValueFunctionCode/RVFCodes/Gurobi/milp_1')
@@ -101,46 +26,18 @@ for key, val in vars(__import__(instanceName)).items():
     vars()[key] = val
 
 
-# In[ ]:
-
-
-# from InstanceTest.obj_3_var_10_nzr_4_intR_6_U_1_ins_2 import *
-# instanceName = 'obj_3_var_10_nzr_4_intR_6_U_1_ins_2'
-
-
-# In[ ]:
-
-
-# from InstanceTest.MILP_obj_2_var_10_nzr_4_intR_6_u_1_ins_0 import *
-# instanceName = 'MILP_obj_2_var_10_nzr_4_intR_6_u_1_ins_0'
-
-
-# In[ ]:
-
-
 # Set it to False for the two-stage converion
 conversionOld = True 
-
-
-# In[ ]:
-
 
 timeLimit = 14400
 debug_print = False
 mipForU = True
 
 
-# In[ ]:
-
-
 def changeValue(value):
     if str(value) == 'None':
         return 0.0
     return value
-
-
-# In[ ]:
-
 
 # Generate a feasible solution to start with
 def generatePointForU():
@@ -167,15 +64,7 @@ def generatePointForU():
     
     return math.ceil(m.objVal)
 
-
-# In[ ]:
-
-
 U = generatePointForU()
-
-
-# In[ ]:
-
 
 # Generate a feasible solution to start with
 def generateInitPoint():
@@ -205,11 +94,7 @@ def generateInitPoint():
 
 totalVarsInit = generateInitPoint()
 
-
-# # one-stage conversion
-
-# In[ ]:
-
+# one-stage conversion
 
 # Convert the feasible solution to an efficient solution
 def convertWeakToStrongNDP_one_stage(_totalVarsInit, _print=False):
@@ -271,10 +156,7 @@ def convertWeakToStrongNDP_one_stage(_totalVarsInit, _print=False):
     return temp
 
 
-# # Two-stage conversion
-
-# In[ ]:
-
+# Two-stage conversion
 
 # Convert the feasible solution to an efficient solution
 def convertWeakToStrongNDP_two_stage(_totalVarsInit, _print=False):
@@ -367,26 +249,15 @@ def convertWeakToStrongNDP_two_stage(_totalVarsInit, _print=False):
         
     return temp
 
-
-# In[ ]:
-
-
 if conversionOld:
     totalVarsInitStrong = convertWeakToStrongNDP_one_stage(totalVarsInit, _print=True)
 else:
     totalVarsInitStrong = convertWeakToStrongNDP_two_stage(totalVarsInit, _print=True)
 
-
-# In[ ]:
-
-
 intPartList = []
 totalPartList = []
 intPartList.append({i: round(totalVarsInitStrong[i]) for i in INTVARS})
 totalPartList.append(totalVarsInitStrong)
-
-
-# In[ ]:
 
 
 idxIntPartList = 1
@@ -515,16 +386,6 @@ while True:
                 
         break  
     
-#     temp_dualVarsVarRHS = {}
-#     for k, v in dualVarsVarRHS.items():
-#         temp_dualVarsVarRHS[k] = round(changeValue(v.X))
-#     print('temp_dualVarsVarRHS', temp_dualVarsVarRHS)
-    
-#     temp_dualVarsFixedRHS = {}
-#     for k, v in dualVarsFixedRHS.items():
-#         temp_dualVarsFixedRHS[k] = round(changeValue(v.X))
-#     print('temp_dualVarsFixedRHS', temp_dualVarsFixedRHS)
-    
     if conversionOld:
         total_part = convertWeakToStrongNDP_one_stage({**dict((k, round(changeValue(v.X))) for k,v in intVars.items()), **dict((k, round(changeValue(v.X))) for k,v in conVars.items())}, _print=False)
     else:
@@ -574,28 +435,3 @@ while True:
     
     iter_num += 1
     print('--------------------')
-
-
-# In[ ]:
-
-
-# EF
-
-
-# In[ ]:
-
-
-# len(EF)
-
-
-# In[ ]:
-
-
-# intPartList
-
-
-# In[ ]:
-
-
-
-

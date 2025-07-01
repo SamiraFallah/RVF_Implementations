@@ -1,51 +1,17 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[3]:
-
-
 '''
 Created on Oct 01, 2022
 
 @author: Samira Fallah (saf418@lehigh.edu)
 '''
 
-
-# In[4]:
-
-
 import time
 import argparse
 from gurobipy import *
 import math
 import numpy as np
-
-
-# # Insert the instance manually
-
-# In[5]:
-
-
-# numVars = 11
-# numIntVars = 10
-# numConsFixed = 1
-# numConsVar = 1
-# INTVARS = range(numIntVars)
-# SLACKVARS = range(numIntVars, numVars)
-# CONSVARRHS = range(numConsVar)
-# CONSFIXEDRHS = range(numConsFixed)
-
-# OBJ = [-566, -611, -506, -180, -817, -184, -585, -423, -26, -317, 0]
-# MAT = {(0, 0):-62, (0, 1):-84, (0, 2):-977, (0, 3):-979, (0, 4):-874, (0, 5):-54, (0, 6):-269, (0, 7):-93, (0, 8):-881, (0, 9):-563, (0, 10):0}
-# MATFixed = {(0, 0):557, (0, 1):898, (0, 2):148, (0, 3):63, (0, 4):78, (0, 5):964, (0, 6):246, (0, 7):662, (0, 8):386, (0, 9):272, (0, 10):1}
-# RHS = {0:2137}
-# eps = 0.5
-# M = 4837
-# UB_I = 1
-
-
-# In[6]:
-
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--instance", help = "specify the instance")
@@ -54,14 +20,6 @@ instance = flags.instance
 # f = open("InstancesTest_SPP/{}".format(instance), "r")
 f = open("InstancesTest_Knapsack/{}".format(instance), "r")
 
-
-# # Read the Knapsack instances
-
-# In[7]:
-
-
-# instance = 'KP_p-3_n-10_ins-1.dat'
-# f = open("InstanceTest/{}".format(instance), "r")
 content = f.read()   
 cont = content.split("\n")
 cont = [i.rstrip() for i in cont]
@@ -110,58 +68,6 @@ CONSFIXEDRHS = range(numConsFixed)
 RHS = {i : RHSList[i] for i in range(0, len(RHSList))}
 UB_I = 1
 
-
-# # Read the SPP instances
-
-# In[8]:
-
-
-# instance = '2mis100_300D.dat'
-# f = open("InstanceTest/{}".format(instance), "r")
-# content = f.read()  
-# cont = content.split("\n")
-
-# numConst, numVar = int(cont[0].split()[0]), int(cont[0].split()[1])
-# c1_coefs = [int(i) for i in cont[1].split()]
-# c2_coefs = [int(i) for i in cont[2].split()]
-# cont = cont[3:]
-# listIndexes = [[int(j) - 1 for j in i.split()] for i in cont[1::2] if i != ''] 
-# c1_coefs = [-i for i in c1_coefs] + [0 for i in range(numConst)]
-# c2_coefs = [-i for i in c2_coefs] + [0 for i in range(numConst)]
-
-# numVars = numVar + numConst
-# numIntVars = numVar 
-# numContVars = 0
-# numConsVar = 1
-# numConsFixed = numConst
-# INTVARS = range(numIntVars)
-# SLACKVARS = range(numIntVars, numVars)
-# VARS = range(numVars)
-# CONSVARRHS = range(numConsVar)
-# CONSFIXEDRHS = range(numConsFixed)
-
-# OBJ = c1_coefs
-# MAT = {(0, i):c2_coefs[i] for i in range(numIntVars)}
-# RHS = {i:1 for i in range(numConst)}
-
-# MATFixed = {}
-# for j in range(numConst):
-#     for i in range(numVar + numConst):
-#         MATFixed[(j, i)] = 0
-
-# k = 0
-# for j in range(numConst):
-#     for i in listIndexes[j]:
-#         MATFixed[(j, i)] = 1
-#     listIndexes[j].append(numVar + k)
-#     MATFixed[(j, numVar + k)] = 1
-#     k += 1
-# UB_I = 1
-
-
-# In[9]:
-
-
 eps = 0.5
 
 M = {}
@@ -169,26 +75,14 @@ M = {}
 for i in CONSVARRHS:
     M[i] = sum(abs(MAT[(i, j)]) for j in range(numVar)) + 1
 
-
-# In[10]:
-
-
 timeLimit = 86400
 debug_print = False
 ipForU = True
-
-
-# In[11]:
-
 
 def changeValue(value):
     if str(value) == 'None':
         return 0.0
     return value
-
-
-# In[12]:
-
 
 # Generate a feasible solution to calculate the upper bound U
 def generatePointForU():
@@ -211,16 +105,8 @@ def generatePointForU():
     
     return math.ceil(m.objVal)
 
-
-# In[13]:
-
-
 start = time.time() 
 U = generatePointForU()  
-
-
-# In[14]:
-
 
 # Generate a feasible solution to start with
 def generateInitPoint():
@@ -244,10 +130,6 @@ def generateInitPoint():
     return temp
 
 intVarsInit = generateInitPoint()
-
-
-# In[15]:
-
 
 # Convert the feasible solution to an efficient solution
 def convertWeakToStrongNDP(_intVarsInit, _print=False):
@@ -294,28 +176,12 @@ def convertWeakToStrongNDP(_intVarsInit, _print=False):
     
 intVarsInitStrong = convertWeakToStrongNDP(intVarsInit, _print=True)
 
-
-# In[16]:
-
-
 initPoint = intVarsInitStrong
-
-
-# In[17]:
-
 
 intPartList = []
 
-
-# In[18]:
-
-
 allIntPartDict = {}
 allIntPartDict[0] = intVarsInitStrong
-
-
-# In[19]:
-
 
 EF = {}
 
@@ -327,19 +193,11 @@ for k in CONSVARRHS:
 
 EF[0] = temp_ndp
 
-
-# In[20]:
-
-
 def calculate_distance(point_a_key, point_b_key): 
     values_dict_a = np.array(list(EF[point_a_key]))
     values_dict_b = np.array(list(EF[point_b_key]))
     
     return np.linalg.norm(values_dict_a - values_dict_b)
-
-
-# In[21]:
-
 
 def generateSubIntLst(allIntPartDict, initPoint, initPointIdx, _totalIter):    
     if _totalIter <= 5:
@@ -368,10 +226,6 @@ def generateSubIntLst(allIntPartDict, initPoint, initPointIdx, _totalIter):
         del tempAllIntPartDict[selected_point]
         
     return list(subIntPartDict.values())
-
-
-# In[22]:
-
 
 shouldCallSubList = True
 allIntPart = False
@@ -494,28 +348,3 @@ while True:
                 _file.write('Number of iterations:' + str(totalIter))
         
         break  
-
-
-# In[25]:
-
-
-# EF
-
-
-# In[2]:
-
-
-# len(EF)
-
-
-# In[26]:
-
-
-# allIntPartDict
-
-
-# In[ ]:
-
-
-# elapsedTime
-

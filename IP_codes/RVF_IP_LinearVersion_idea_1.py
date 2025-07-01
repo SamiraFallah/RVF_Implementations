@@ -1,48 +1,15 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
-
-
 '''
 Created on Oct 01, 2022
 
 @author: Samira Fallah (saf418@lehigh.edu)
 '''
 
-
-# In[2]:
-
-
 import time
 import argparse
 from gurobipy import *
-
-
-# # Insert the instance manually
-
-# In[3]:
-
-
-# numVars = 11
-# numIntVars = 10
-# numConsFixed = 1
-# numConsVar = 1
-# INTVARS = range(numIntVars)
-# SLACKVARS = range(numIntVars, numVars)
-# CONSVARRHS = range(numConsVar)
-# CONSFIXEDRHS = range(numConsFixed)
-
-# OBJ = [-566, -611, -506, -180, -817, -184, -585, -423, -26, -317, 0]
-# MAT = {(0, 0):-62, (0, 1):-84, (0, 2):-977, (0, 3):-979, (0, 4):-874, (0, 5):-54, (0, 6):-269, (0, 7):-93, (0, 8):-881, (0, 9):-563, (0, 10):0}
-# MATFixed = {(0, 0):557, (0, 1):898, (0, 2):148, (0, 3):63, (0, 4):78, (0, 5):964, (0, 6):246, (0, 7):662, (0, 8):386, (0, 9):272, (0, 10):1}
-# RHS = {0:2137}
-# eps = 0.5
-# M = 4837
-
-
-# In[4]:
-
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--instance", help = "specify the instance")
@@ -51,69 +18,6 @@ instance = flags.instance
 f = open("InstancesTest_SPP_rest/{}".format(instance), "r")
 #f = open("InstancesTest_Knapsack_rest/{}".format(instance), "r")
 
-
-# # Read the Knapsack instances
-
-# In[5]:
-
-
-#instance = 'KP_p-3_n-10_ins-1.dat'
-#f = open("InstanceTest/{}".format(instance), "r")
-# content = f.read()   
-# cont = content.split("\n")
-# cont = [i.rstrip() for i in cont]
-
-# numObj = int(cont[0])
-# numVar = int(cont[1])
-# capacity = int(cont[2])
-
-# mapping = [(i, ' ') for i in ['[',']',',']]
-
-# MAT = {}
-# OBJ = []
-# for i in range(numObj):
-#     tmp = cont[3 + i]
-#     for k, v in mapping:
-#         tmp = tmp.replace(k, v)
-#     tmp = list(map(int, tmp.split())) 
-#     tmp.append(0)
-#     if i == 0:
-#         OBJ = [-tmp[k] for k in range(numVar+1)]
-#     else:
-#         MAT.update({(i-1, j):-tmp[j] for j in range(numVar+1)})
-
-# numConst = 1
-
-# MATFixed = {}
-# for i in range(numConst):
-#     tmp = cont[i + 3 + numObj]
-#     for k, v in mapping:
-#         tmp = tmp.replace(k, v)
-#     tmp = list(map(int, tmp.split())) 
-#     for j in range(numVar):
-#         MATFixed[(i, j)] = tmp[j] 
-# MATFixed[(0, numVar)] = 1  
-# RHSList = [capacity]
-
-# numVars = numVar + numConst
-# numIntVars = numVar    
-# numConsVar = numObj - 1
-# numConsFixed = 1
-# INTVARS = range(numIntVars)
-# SLACKVARS = range(numIntVars, numVars)
-# CONSVARRHS = range(numConsVar)
-# CONSFIXEDRHS = range(numConsFixed)
-
-# RHS = {i : RHSList[i] for i in range(0, len(RHSList))}
-
-
-# # Read the SPP instances
-
-# In[6]:
-
-
-# instance = '2mis100_300D.dat'
-# f = open("InstanceTest/{}".format(instance), "r")
 content = f.read()  
 cont = content.split("\n")
 
@@ -153,10 +57,6 @@ for j in range(numConst):
     MATFixed[(j, numVar + k)] = 1
     k += 1
 
-
-# In[7]:
-
-
 eps = 0.5
 
 M = {}
@@ -164,32 +64,16 @@ M = {}
 for i in CONSVARRHS:
     M[i] = sum(-MAT[(i, j)] for j in range(numVar)) + 1
 
-
-# In[8]:
-
-
 # Set it to False for the two-stage converion
 conversionOld = False 
 
-
-# In[9]:
-
-
 timeLimit = 86400
 debug_print = False
-
-
-# In[10]:
-
 
 def changeValue(value):
     if str(value) == 'None':
         return 0.0
     return value
-
-
-# In[11]:
-
 
 # Generate a feasible solution to calculate the upper bound U
 def generatePointForU():
@@ -216,10 +100,6 @@ start = time.time()
 intVarsU = generatePointForU()
 U = sum(OBJ[j]*intVarsU[j] for j in INTVARS)
 
-
-# In[12]:
-
-
 # Generate a feasible solution to start with
 def generateInitPoint():
     m = Model()
@@ -244,10 +124,7 @@ def generateInitPoint():
 intVarsInit = generateInitPoint()
 
 
-# # one-stage conversion
-
-# In[13]:
-
+# one-stage conversion
 
 # Convert the feasible solution to an efficient solution
 def convertWeakToStrongNDP_one_stage(_intVarsInit, _print=False):
@@ -292,11 +169,7 @@ def convertWeakToStrongNDP_one_stage(_intVarsInit, _print=False):
     
     return temp
 
-
-# # Two-stage conversion
-
-# In[14]:
-
+# Two-stage conversion
 
 # Convert the feasible solution to an efficient solution
 def convertWeakToStrongNDP_two_stage(_intVarsInit, _print=False):
@@ -370,24 +243,13 @@ def convertWeakToStrongNDP_two_stage(_intVarsInit, _print=False):
 
     return temp
 
-
-# In[15]:
-
-
 if conversionOld:
     intVarsInitStrong = convertWeakToStrongNDP_one_stage(intVarsInit, _print=True)
 else:
     intVarsInitStrong = convertWeakToStrongNDP_two_stage(intVarsInit, _print=True)
 
-
-# In[16]:
-
-
 intPartList = []
 intPartList.append({**intVarsInitStrong})
-
-
-# In[17]:
 
 
 EF = []
@@ -399,9 +261,6 @@ for k in CONSVARRHS:
     temp_ndp = temp_ndp + (sum(MAT[(k, l)]*intVarsInitStrong[l] for l in INTVARS),)
 
 EF.append(temp_ndp)
-
-
-# In[18]:
 
 
 idxIntPartList = 1
@@ -494,7 +353,6 @@ while True:
                 _file.write('Number of iterations:' + str(idxIntPartList))
         
         break
-    
     
     int_part = convertWeakToStrongNDP_one_stage({**dict((k, round(changeValue(v.X))) for k,v in intVars.items())}, _print=False)
     
@@ -596,27 +454,3 @@ while True:
             m.addConstr(betaVars[lastIntPartIndex] <= sum(alphaVars[(i, lastIntPartIndex)] for i in CONSVARRHS))
     
     idxIntPartList += 1  
-
-
-# In[19]:
-
-
-# EF
-
-
-# In[20]:
-
-
-# len(EF)
-
-
-# In[21]:
-
-
-# elapsedTime
-
-
-# In[ ]:
-
-
-

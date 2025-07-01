@@ -1,51 +1,17 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[44]:
-
-
 '''
 Created on Oct 01, 2022
 
 @author: Samira Fallah (saf418@lehigh.edu)
 '''
 
-
-# In[45]:
-
-
 import time
 import argparse
 from gurobipy import *
 import math
 import random
-
-
-# # Insert the instance manually
-
-# In[46]:
-
-
-# numVars = 11
-# numIntVars = 10
-# numConsFixed = 1
-# numConsVar = 1
-# INTVARS = range(numIntVars)
-# SLACKVARS = range(numIntVars, numVars)
-# CONSVARRHS = range(numConsVar)
-# CONSFIXEDRHS = range(numConsFixed)
-
-# OBJ = [-566, -611, -506, -180, -817, -184, -585, -423, -26, -317, 0]
-# MAT = {(0, 0):-62, (0, 1):-84, (0, 2):-977, (0, 3):-979, (0, 4):-874, (0, 5):-54, (0, 6):-269, (0, 7):-93, (0, 8):-881, (0, 9):-563, (0, 10):0}
-# MATFixed = {(0, 0):557, (0, 1):898, (0, 2):148, (0, 3):63, (0, 4):78, (0, 5):964, (0, 6):246, (0, 7):662, (0, 8):386, (0, 9):272, (0, 10):1}
-# RHS = {0:2137}
-# eps = 0.5
-# M = 4837
-# UB_I = 1
-
-
-# In[47]:
-
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--instance", help = "specify the instance")
@@ -54,70 +20,6 @@ instance = flags.instance
 f = open("InstancesTest_SPP/{}".format(instance), "r")
 # f = open("InstancesTest_Knapsack/{}".format(instance), "r")
 
-
-# # Read the Knapsack instances
-
-# In[48]:
-
-
-# instance = 'KP_p-3_n-10_ins-1.dat'
-# f = open("InstanceTest/{}".format(instance), "r")
-# content = f.read()   
-# cont = content.split("\n")
-# cont = [i.rstrip() for i in cont]
-
-# numObj = int(cont[0])
-# numVar = int(cont[1])
-# capacity = int(cont[2])
-
-# mapping = [(i, ' ') for i in ['[',']',',']]
-
-# MAT = {}
-# OBJ = []
-# for i in range(numObj):
-#     tmp = cont[3 + i]
-#     for k, v in mapping:
-#         tmp = tmp.replace(k, v)
-#     tmp = list(map(int, tmp.split())) 
-#     tmp.append(0)
-#     if i == 0:
-#         OBJ = [-tmp[k] for k in range(numVar+1)]
-#     else:
-#         MAT.update({(i-1, j):-tmp[j] for j in range(numVar+1)})
-
-# numConst = 1
-
-# MATFixed = {}
-# for i in range(numConst):
-#     tmp = cont[i + 3 + numObj]
-#     for k, v in mapping:
-#         tmp = tmp.replace(k, v)
-#     tmp = list(map(int, tmp.split())) 
-#     for j in range(numVar):
-#         MATFixed[(i, j)] = tmp[j] 
-# MATFixed[(0, numVar)] = 1  
-# RHSList = [capacity]
-
-# numVars = numVar + numConst
-# numIntVars = numVar    
-# numConsVar = numObj - 1
-# numConsFixed = 1
-# INTVARS = range(numIntVars)
-# SLACKVARS = range(numIntVars, numVars)
-# CONSVARRHS = range(numConsVar)
-# CONSFIXEDRHS = range(numConsFixed)
-
-# RHS = {i : RHSList[i] for i in range(0, len(RHSList))}
-# UB_I = 1
-
-
-# # Read the SPP instances
-
-# In[49]:
-
-
-# instance = '2spp101_300D.dat'
-# f = open("InstanceTest/{}".format(instance), "r")
 content = f.read()  
 cont = content.split("\n")
 
@@ -158,10 +60,6 @@ for j in range(numConst):
     k += 1
 UB_I = 1
 
-
-# In[50]:
-
-
 eps = 0.5
 
 M = {}
@@ -169,26 +67,14 @@ M = {}
 for i in CONSVARRHS:
     M[i] = sum(-MAT[(i, j)] for j in range(numVar)) + 1
 
-
-# In[51]:
-
-
 timeLimit = 86400
 debug_print = False
 ipForU = True
-
-
-# In[52]:
-
 
 def changeValue(value):
     if str(value) == 'None':
         return 0.0
     return value
-
-
-# In[53]:
-
 
 # Generate a feasible solution to calculate the upper bound U
 def generatePointForU():
@@ -211,16 +97,8 @@ def generatePointForU():
     
     return math.ceil(m.objVal)
 
-
-# In[54]:
-
-
 start = time.time() 
 U = generatePointForU()  
-
-
-# In[55]:
-
 
 # Generate a feasible solution to start with
 def generateInitPoint():
@@ -244,10 +122,6 @@ def generateInitPoint():
     return temp
 
 intVarsInit = generateInitPoint()
-
-
-# In[56]:
-
 
 # Convert the feasible solution to an efficient solution
 def convertWeakToStrongNDP(_intVarsInit, _print=False):
@@ -294,18 +168,10 @@ def convertWeakToStrongNDP(_intVarsInit, _print=False):
     
 intVarsInitStrong = convertWeakToStrongNDP(intVarsInit, _print=True)
 
-
-# In[57]:
-
-
 intPartList = []
 intPartList.append(intVarsInitStrong)
 intPartListOrig = []
 intPartListOrig.append(intVarsInitStrong)
-
-
-# In[58]:
-
 
 EF = []
 
@@ -317,10 +183,6 @@ for k in CONSVARRHS:
 
 EF.append(temp_ndp)
 
-
-# In[59]:
-
-
 def genSubPrimalConst():
     distinct_i_values = list(set(i for i in RHS.keys()))
     random.shuffle(distinct_i_values)
@@ -329,10 +191,6 @@ def genSubPrimalConst():
     tempCONSFIXEDRHS = selected_i_values 
 
     return tempCONSFIXEDRHS
-
-
-# In[60]:
-
 
 def findIntPart(tempRHS):
     m = Model()
@@ -359,10 +217,6 @@ def findIntPart(tempRHS):
     else:
         return
 
-
-# In[61]:
-
-
 idxIntPartList = 1
 thetaList = [] 
 
@@ -372,8 +226,6 @@ allPrimalAfterThisIter = False
 primalRatio = 0.1
 
 while True:
-#     print('allPrimalAfterThisIter', allPrimalAfterThisIter)
-    
     if (allPrimalAfterThisIter):
         tempCONSFIXEDRHS = CONSFIXEDRHS
     
@@ -445,8 +297,6 @@ while True:
     end = time.time()
     elapsedTime = end - start
     
-#     print('status', m.getAttr('Status'))
-    
     thetaList.append(round(thetaVar.X, 2))
     
     if ((thetaVar.X < 0.1) and (allPrimalAfterThisIter)) or elapsedTime > timeLimit:
@@ -483,7 +333,6 @@ while True:
 
         resFindIntPart = findIntPart(tempRHS)
         if resFindIntPart != None:
-#             print('Found a feasible int part for the original problem!')
             int_part_org = convertWeakToStrongNDP(resFindIntPart, _print=False)
             
             temp_ndp = () 
@@ -491,8 +340,7 @@ while True:
 
             for k in CONSVARRHS:
                 temp_ndp = temp_ndp + (round(sum(MAT[(k, l)]*int_part_org[l] for l in INTVARS)),) 
-#             print('NDP', temp_ndp)
-            
+
             if temp_ndp not in EF:
                 EF.append(temp_ndp)
                 intPartListOrig.append(int_part_org)
@@ -506,7 +354,6 @@ while True:
         for k in CONSVARRHS:
             temp_ndp = temp_ndp + (round(sum(MAT[(k, l)]*int_part_converted[l] for l in INTVARS)),) 
             
-#         print('NDP', temp_ndp)
         EF.append(temp_ndp)
     
     if thetaList[-1] <= 1000 and not allPrimalAfterThisIter:
@@ -514,69 +361,3 @@ while True:
         intPartList = intPartListOrig
     
     idxIntPartList += 1  
-        
-#     print('---------------------------------')
-
-
-# In[ ]:
-
-
-# idxIntPartList
-
-
-# In[ ]:
-
-
-# EF
-
-
-# In[ ]:
-
-
-# len(EF)
-
-
-# In[ ]:
-
-
-# 1192.000 862.000
-# 1050.000 1234.000
-# 1162.000 1138.000
-# 1176.000 1026.000
-# 1184.000 900.000
-# 1172.000 1062.000
-# 1168.000 1064.000
-# 1126.000 1192.000
-# 1140.000 1146.000
-# 1138.000 1148.000
-# 1058.000 1196.000
-
-
-# In[ ]:
-
-
-#     all_equal = True  
-#     if allPrimalAfterThisIter == False:
-#         for k in CONSFIXEDRHS:
-#             lhs = sum(MATFixed[(k, j)] * int_part[j] for j in INTVARS) + sum(MATFixed[(k, j)] * slack_part[j] for j in SLACKVARS)
-#             if lhs != RHS[k]:
-#                 all_equal = False 
-#                 print("Not feasible for the original problem.")
-#                 break  
-
-#         if all_equal:
-#             intPartListOrig.append(int_part) 
-#             print("Feasible for the original problem.")
-
-
-# In[ ]:
-
-
-# intPartList
-
-
-# In[ ]:
-
-
-# elapsedTime
-
